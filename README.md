@@ -77,7 +77,7 @@ chmod +x start.sh
 1. **Access the web interface** at your configured domain
 2. **Grant OAuth access:**
    - Enter a unique user identifier (e.g., "user123", "channel_name")  
-   - Click "Start OAuth Flow"
+   - Click "Connect YouTube Account"
    - Authorize through Google
    - Automatic redirect back with confirmation
 3. **Access stored tokens:**
