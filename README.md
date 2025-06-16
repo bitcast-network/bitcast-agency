@@ -2,40 +2,11 @@
 
 **An open-source template for content creator agencies to collect YouTube OAuth tokens for Bitcast Network mining (Subnet 93 on Bittensor).**
 
-This is a **template application** designed for agencies working with YouTubers and content creators who want to participate in decentralized AI mining on the Bitcast Network. The template provides a clean, branded interface for content creators to safely authorize access to their YouTube accounts.
-
-## 📸 **Screenshot**
+This is a **template application** designed for agencies working participating in decentralized mining on the Bitcast Network. The template provides a clean, branded interface for content creators to safely authorize access to their YouTube accounts.
 
 ![YouTube OAuth Manager Interface](sample.png)
 
-*Clean, modern interface with customizable branding - logo, colors, and title can all be configured via environment variables.*
-
-## 🎯 **Use Case**
-
-This template is designed for:
-- **Content creator agencies** managing multiple YouTube channels
-- **Agencies recruiting YouTubers** for Bitcast Network participation  
-- **Organizations** needing secure YouTube OAuth token collection
-- **Developers** building custom creator onboarding solutions
-
-## ⚠️ **IMPORTANT DISCLAIMERS**
-
-### 🔒 **Security Notice**
-**THIS IS A BASIC TEMPLATE** - Before production use, you MUST:
-- ✅ Implement proper authentication/authorization for admin endpoints
-- ✅ Add rate limiting and abuse protection
-- ✅ Secure credential storage with encryption at rest
-- ✅ Implement audit logging for all OAuth operations
-- ✅ Review and enhance security based on your specific needs
-- ✅ Comply with YouTube API Terms of Service
-- ✅ Implement proper user consent and data handling procedures
-
-### 📋 **Legal & Compliance**
-- **User Consent Required:** Ensure proper consent from content creators
-- **YouTube ToS Compliance:** Review YouTube API Terms of Service
-- **Data Protection:** Implement GDPR/CCPA compliance if applicable
-- **Transparency:** Clearly communicate data usage to participants
-- **Template License:** This is provided as-is for customization and enhancement
+*Clean, simple interface with customizable branding - logo, colors, and title can all be configured via environment variables.*
 
 ### 🏗️ **Template Nature**
 This is a **starting template** intended to be:
@@ -44,16 +15,11 @@ This is a **starting template** intended to be:
 - **Modified** to fit your specific workflow
 - **Extended** with features relevant to your use case
 
-**NOT production-ready out of the box** - requires security hardening and customization.
-
 ## ⚠️ **REQUIREMENTS FOR PRODUCTION**
 
 **🌐 Domain Required:** Google OAuth requires HTTPS, which means you **MUST** have:
 - A **purchased domain name** (e.g., `yourdomain.com`, `oauth.yourdomain.com`)
-- **DNS A record** pointing to your server's IP address
-- **HTTPS enabled** (handled automatically by Caddy)
-
-**📝 Localhost limitation:** `localhost` only works for development/testing - Google OAuth will not work with `localhost` in production.
+- **DNS A record** pointing to your server's IP address (configure with your domain provider)
 
 ## 🚀 Quick Start
 
@@ -79,17 +45,7 @@ This is a **starting template** intended to be:
    - Caddy will automatically obtain SSL certificates
    - OAuth will work with HTTPS
 
-### **Development Only (Limited OAuth):**
-   ```bash
-   # No domain needed - uses localhost
-   ./start.sh
-   # Access via http://localhost
-   ```
-   ⚠️ **Note:** OAuth with Google has limitations on localhost
-
 ## 🔑 Google OAuth Setup
-
-**Prerequisites:** You MUST have a domain name and HTTPS configured before setting up OAuth.
 
 Before using the application, you need to configure Google OAuth credentials:
 
@@ -121,8 +77,6 @@ Before using the application, you need to configure Google OAuth credentials:
 - Name: Chosen name
 - **Authorized redirect URIs:**
   - **Production:** `https://yourdomain.com/api/oauth/callback` (replace with your actual domain)
-  - **Development:** `http://localhost:8000/api/oauth/callback`
-  - **Example:** If your domain is `oauth.bitcast.network`, use: `https://oauth.bitcast.network/api/oauth/callback`
   
   ⚠️ **Important:** The redirect URI must match EXACTLY what your app sends. Common mistakes:
   - Missing `/api/oauth` in the path
@@ -137,6 +91,9 @@ Before using the application, you need to configure Google OAuth credentials:
   ```
   backend/secrets/client_secret.json
   ```
+
+
+
 
 ## 🌐 Domain Setup (REQUIRED for OAuth)
 
@@ -228,49 +185,6 @@ echo "THEME_COLOR=#your-brand-color" >> .env
 - Branded email templates
 - Custom success/error pages
 
-**Workflow Integration:**
-- Custom user consent flows
-- Integration with your CRM/database
-- Automated creator onboarding
-- Custom analytics and reporting
-
-**Enhanced Features to Consider:**
-- Multi-step onboarding wizard
-- Creator verification workflows
-- Automated contract generation
-- Payment integration for creator incentives
-- Advanced analytics dashboard
-- Bulk operations management
-
-**Logo Requirements:**
-- Place logo files in the `frontend/` directory
-- Supported formats: PNG, SVG, JPG, GIF
-- Recommended size: 120x120 pixels (displayed as circle with padding)
-- Path relative to web root (e.g., `/logo.svg`, `/images/logo.png`)
-
-**Theme Colors:**
-- Any valid hex color code (e.g., `#ff6b6b`, `#4ecdc4`)
-- Used for background gradient, buttons, and accents
-- Lighter variant automatically generated
-
-### **Example Customizations**
-```bash
-# Marketing Agency Example
-APP_TITLE=CreatorCorp Onboarding Portal
-LOGO_PATH=/assets/creatorcorp-logo.svg
-THEME_COLOR=#6366f1
-
-# Mining Pool Example  
-APP_TITLE=BitMine Creator Registration
-LOGO_PATH=/assets/bitmine-logo.png
-THEME_COLOR=#10b981
-
-# Talent Agency Example
-APP_TITLE=TalentHub YouTube Integration
-LOGO_PATH=/assets/talenthub-logo.svg
-THEME_COLOR=#f59e0b
-```
-
 ## 🔧 API Endpoints
 
 - `GET /api/status` - Service status and configuration
@@ -300,86 +214,12 @@ THEME_COLOR=#f59e0b
 └── reset.sh              # Full reset script (removes all data)
 ```
 
-**Local development:**
-```bash
-# Install dependencies
-pip install -r backend/requirements.txt
-
-# Run FastAPI directly
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-## 🐳 Docker Commands
-
-```bash
-# Start/restart services (preserves SSL certificates)
-./start.sh
-
-# Stop services
-./stop.sh
-
-# Complete reset (removes ALL data including SSL certificates)
-./reset.sh
-
-# View logs
-sudo docker-compose logs -f
-
-# View specific service logs
-sudo docker-compose logs -f caddy
-sudo docker-compose logs -f backend
-
-# Rebuild containers (keeps volumes)
-sudo docker-compose build --no-cache
-```
-
 ## 📝 Notes
 
-- Each user identifier maps to a separate set of OAuth credentials
-- Tokens are automatically refreshed when expired
 - All credentials are stored locally in the `backend/secrets/credentials/` directory
 - The application serves both the API and web interface through Caddy on port 80
 - Domain configuration is handled via the `DOMAIN` environment variable (defaults to `localhost` for development)
 - Copy `env.example` to `.env` and customize for your deployment
-- The `.env` file is ignored by git to keep your configuration secure
-
-## 🔒 Security & Production Hardening
-
-### **Basic Security (Included)**
-- ✅ **HTTPS Required:** Google OAuth requires real domain with HTTPS
-- ✅ **SSL Management:** Automatic certificate handling via Caddy
-- ✅ **Read-only Scopes:** OAuth tokens limited to YouTube read-only access
-- ✅ **Secure Storage:** Credentials stored in protected filesystem location
-
-### **Required Production Enhancements**
-**⚠️ YOU MUST IMPLEMENT BEFORE PRODUCTION USE:**
-
-**Authentication & Authorization:**
-- 🔒 Add admin authentication (API keys, JWT, OAuth)
-- 🔒 Implement user session management
-- 🔒 Restrict sensitive endpoints to authenticated users only
-- 🔒 Add role-based access control
-
-**Security Hardening:**
-- 🔒 Add rate limiting (per-IP, per-user)
-- 🔒 Implement CSRF protection
-- 🔒 Add request validation and sanitization
-- 🔒 Encrypt credentials at rest
-- 🔒 Implement audit logging
-- 🔒 Add monitoring and alerting
-
-**Compliance & Legal:**
-- 📋 Add user consent workflows
-- 📋 Implement data retention policies
-- 📋 Add privacy policy and terms of service
-- 📋 Ensure GDPR/CCPA compliance
-- 📋 Document data usage and sharing
-
-### **Recommendations**
-- 🔧 Deploy behind a WAF (Web Application Firewall)
-- 🔧 Use a secrets management service (AWS Secrets Manager, HashiCorp Vault)
-- 🔧 Implement backup and recovery procedures
-- 🔧 Regular security audits and penetration testing
-- 🔧 Monitor for suspicious activity patterns
 
 ## ❗ Troubleshooting
 
@@ -395,28 +235,6 @@ This error occurs when the redirect URI in your Google OAuth setup doesn't match
 3. **Add the exact URI:** Must match exactly, including `https://` and `/api/oauth/callback`
 4. **Wait 2-3 minutes** for changes to propagate
 
-**Example:** If your app shows `https://oauth.bitcast.network/api/oauth/callback`, add that exact URI to Google Console.
-
-## 🌐 **About Bitcast Network**
-
-The Bitcast Network is a decentralized AI mining subnet (Subnet 93) on the Bittensor network that rewards content creators for contributing data to improve AI models. This template facilitates the onboarding process for YouTube creators who want to participate in the network.
-
-### **Typical Workflow**
-1. **Agency Setup:** Deploy and customize this template with your branding
-2. **Creator Recruitment:** Share your branded onboarding portal with creators
-3. **OAuth Collection:** Creators authorize YouTube access through your portal
-4. **Bitcast Integration:** Use collected tokens with Bitcast Network mining operations
-5. **Revenue Sharing:** Distribute mining rewards to participating creators
-
-### **Integration Points**
-This template provides OAuth tokens that can be used with:
-- Bitcast Network validator/miner nodes
-- Custom analytics and content analysis tools  
-- Creator performance tracking systems
-- Automated reward distribution mechanisms
-
-For more information about Bitcast Network: [Subnet 93 Documentation](https://bittensor.com/subnets)
-
 ## 📄 **License & Contributing**
 
 ### **License**
@@ -425,23 +243,11 @@ This project is open-source and available under the MIT License. See `LICENSE` f
 ### **Contributing**
 Contributions are welcome! This template benefits the entire creator economy ecosystem.
 
-**Ways to Contribute:**
-- 🐛 Bug fixes and security improvements
-- ✨ New features and integrations  
-- 📚 Documentation and tutorials
-- 🎨 UI/UX improvements
-- 🔒 Security enhancements
-
 **Before Contributing:**
 - Review existing issues and pull requests
 - Follow security best practices
 - Test thoroughly before submitting
 - Document new features clearly
-
-### **Support & Community**
-- **Issues:** GitHub Issues for bugs and feature requests
-- **Discussions:** GitHub Discussions for questions and ideas
-- **Security:** Report security issues privately via email
 
 ### **Disclaimer**
 This software is provided "as-is" without warranty. Users are responsible for:
