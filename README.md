@@ -27,6 +27,17 @@ This is a **template application** designed for agencies participating in decent
   sudo usermod -aG docker $USER  # Log out and back in after this
   ```
 
+### **Server/Firewall Configuration**
+- **Open ports:** 80 (HTTP) and 443 (HTTPS)
+  ```bash
+  # Ubuntu/Debian UFW firewall
+  sudo ufw allow 80
+  sudo ufw allow 443
+  
+  # AWS Security Groups: Allow inbound TCP 80 and 443 from 0.0.0.0/0
+  # Other cloud providers: Similar inbound rules for ports 80 and 443
+  ```
+
 ### **Domain & DNS (Required for Production)**
 - **Domain name** from any provider (GoDaddy, Namecheap, Cloudflare, etc.)
 - **DNS A record** pointing your domain to your server's IP address
