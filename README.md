@@ -12,9 +12,7 @@ This is a **template application** designed for agencies working participating i
 This is a **starting template** intended to be:
 - **Customized** with your branding and requirements
 - **Enhanced** with additional security measures
-- **Modified** to fit your specific workflow
-- **Extended** with features relevant to your use case
-
+  
 ## ⚠️ **REQUIREMENTS FOR PRODUCTION**
 
 **🌐 Domain Required:** Google OAuth requires HTTPS, which means you **MUST** have:
