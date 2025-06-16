@@ -8,6 +8,9 @@ This is a **template application** designed for agencies working participating i
 
 *Clean, simple interface with customizable branding - logo, colors, and title can all be configured via environment variables.*
 
+## ⚠️ **Technical Note**
+This template requires technical expertise in server administration, domain management, and OAuth setup. This is an open-source project provided as-is with no active support or bug-fixing service. Users are responsible for their own deployment, maintenance, and security.
+
 ### 🏗️ **Template Nature**
 This is a **starting template** intended to be:
 - **Customized** with your branding and requirements
