@@ -2,7 +2,7 @@
 
 **An open-source template for content creator agencies to collect YouTube OAuth tokens for Bitcast Network mining (Subnet 93 on Bittensor).**
 
-This is a **template application** designed for agencies participating in decentralized mining on the Bitcast Network. The template provides a clean, branded interface for content creators to safely authorize access to their YouTube accounts.
+This is a **template application** designed for agencies participating in decentralized mining on the Bitcast Network. The template provides a clean, branded interface for content creators to authorize access to their YouTube accounts.
 
 ![YouTube OAuth Manager Interface](sample.png)
 
@@ -85,15 +85,19 @@ chmod +x start.sh
 
 ## 📖 **How to Use**
 
-1. **Access the web interface** at your configured domain
-2. **Grant OAuth access:**
-   - Enter a unique user identifier (e.g., "user123", "channel_name")  
-   - Click "Connect YouTube Account"
-   - Authorize through Google
-   - Automatic redirect back with confirmation
-3. **Access stored tokens:**
-   - Credentials saved in `backend/secrets/credentials/creds_{user_id}.pkl`
-   - Use your application code to access stored credentials
+1. **Launch**
+   - Run `./start.sh`
+   - Access at `https://yourdomain.com`
+
+2. **Creator Authentication**
+   - Share URL with creators
+   - They enter ID and connect YouTube account
+   - OAuth credentials saved as `backend/secrets/credentials/creds_{user_id}.pkl`
+
+3. **Bitcast Miner Setup**
+   - Copy credential files to your miner
+   - Configure miner to use these credentials
+   - See [Bitcast miner docs](https://github.com/bitcast-network/bitcast)
 
 ## 🎨 **Customization**
 
