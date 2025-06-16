@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./frontend:/app/frontend
+      - ./backend/secrets/credentials:/app/backend/secrets/credentials
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+      - APP_TITLE=${APP_TITLE:-🎥 YouTube OAuth Manager}
+      - LOGO_PATH=${LOGO_PATH:-/icon_gradient.svg}
+      - THEME_COLOR=${THEME_COLOR:-#667eea}
+    restart: always
+
+  caddy:
+    image: caddy:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+    depends_on:
+      - backend
+
+volumes:
+  caddy_data:
+  caddy_config: 

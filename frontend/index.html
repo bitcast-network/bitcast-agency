@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">YouTube OAuth Manager</title>
+    <style>
+        :root {
+            --theme-color: #667eea;
+            --theme-color-light: #764ba2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--theme-color) 0%, var(--theme-color-light) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 800px;
+            width: 90%;
+            margin: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-success {
+            background: #d1f2eb;
+            color: #00875f;
+        }
+
+        .status-error {
+            background: #ffebe6;
+            color: #de350b;
+        }
+
+        .auth-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .auth-section h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--theme-color) 0%, var(--theme-color-light) 100%);
+            color: #333;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-right: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px color-mix(in srgb, var(--theme-color), transparent 70%);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #d1f2eb;
+            color: #00875f;
+            border: 1px solid #00875f;
+        }
+
+        .message.error {
+            background: #ffebe6;
+            color: #de350b;
+            border: 1px solid #de350b;
+        }
+
+        .message.info {
+            background: #deebff;
+            color: #0065ff;
+            border: 1px solid #0065ff;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .auth-url-section {
+            background: #deebff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .auth-url-section a {
+            color: #0065ff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-url-section a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="width: 120px; height: 120px; margin: 0 auto 1rem; border-radius: 50%; box-shadow: 0 6px 20px rgba(0,0,0,0.15); background: white; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+                <img id="appLogo" src="/logo.svg" alt="Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <h1 id="appTitle">🎥 YouTube OAuth Manager</h1>
+            <p>Connect your YouTube account below to work with us</p>
+            <div id="setupStatus" class="status-indicator"></div>
+        </div>
+
+        <div id="messageContainer"></div>
+
+        <div class="auth-section">
+            <h2>Grant YouTube Access</h2>
+            <div class="form-group">
+                <label for="userId">User Identifier:</label>
+                <input type="text" id="userId" placeholder="Enter a unique identifier (e.g., user123, channel_name)" />
+            </div>
+            <button class="btn" onclick="startOAuth()">Start OAuth Flow</button>
+            
+            <div id="authInProgress" class="auth-url-section hidden">
+                <p><strong>🔄 OAuth in progress...</strong></p>
+                <p>You will be redirected to Google for authorization. After granting access, you'll be automatically redirected back.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUserId = '';
+
+        // Check OAuth setup on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConfig();
+            checkSetup();
+            handleOAuthReturn();
+        });
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function generateLighterColor(hex, factor = 0.3) {
+            const rgb = hexToRgb(hex);
+            if (!rgb) return hex;
+            
+            // Blend with white to make lighter
+            const r = Math.round(rgb.r + (255 - rgb.r) * factor);
+            const g = Math.round(rgb.g + (255 - rgb.g) * factor);
+            const b = Math.round(rgb.b + (255 - rgb.b) * factor);
+            
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        }
+
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                
+                // Update page title
+                document.getElementById('pageTitle').textContent = config.app_title;
+                document.title = config.app_title;
+                
+                // Update header title  
+                document.getElementById('appTitle').textContent = config.app_title;
+                
+                // Update logo
+                const logoElement = document.getElementById('appLogo');
+                logoElement.src = config.logo_path;
+                logoElement.onerror = function() {
+                    // Hide logo if it fails to load
+                    this.style.display = 'none';
+                };
+
+                // Update theme colors
+                if (config.theme_color) {
+                    const lightColor = generateLighterColor(config.theme_color, 0.4);
+                    document.documentElement.style.setProperty('--theme-color', config.theme_color);
+                    document.documentElement.style.setProperty('--theme-color-light', lightColor);
+                }
+            } catch (error) {
+                console.error('Error loading configuration:', error);
+                // Keep defaults if config fails to load
+            }
+        }
+
+        function handleOAuthReturn() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            const error = urlParams.get('error');
+            const message = urlParams.get('message');
+            const userId = urlParams.get('user_id');
+
+            if (success === 'true') {
+                showMessage(message || `OAuth completed successfully for ${userId}`, 'success');
+                // Clear URL parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (error === 'true') {
+                showMessage(message || 'OAuth authorization failed', 'error');
+                // Clear URL parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // Hide the "in progress" indicator
+            document.getElementById('authInProgress').classList.add('hidden');
+        }
+
+        async function checkSetup() {
+            try {
+                const response = await fetch('/api/oauth/check-setup');
+                const data = await response.json();
+                
+                const statusElement = document.getElementById('setupStatus');
+                if (data.configured) {
+                    statusElement.textContent = '✅ Ready';
+                    statusElement.className = 'status-indicator status-success';
+                } else {
+                    statusElement.textContent = '❌ OAuth Not Configured';
+                    statusElement.className = 'status-indicator status-error';
+                    showMessage('Please configure Google OAuth client secrets first.', 'error');
+                }
+            } catch (error) {
+                console.error('Error checking setup:', error);
+                showMessage('Error checking OAuth configuration.', 'error');
+            }
+        }
+
+        async function startOAuth() {
+            const userId = document.getElementById('userId').value.trim();
+            if (!userId) {
+                showMessage('Please enter a user identifier.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/oauth/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentUserId = userId;
+                    document.getElementById('authInProgress').classList.remove('hidden');
+                    showMessage(`Redirecting to Google for authorization...`, 'info');
+                    
+                    // Automatically redirect to the OAuth URL
+                    setTimeout(() => {
+                        window.location.href = data.auth_url;
+                    }, 1000); // Small delay to show the message
+                } else {
+                    showMessage(data.detail || 'Error starting OAuth flow', 'error');
+                }
+            } catch (error) {
+                console.error('Error starting OAuth:', error);
+                showMessage('Error starting OAuth flow.', 'error');
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = text;
+            
+            messageContainer.innerHTML = '';
+            messageContainer.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 
