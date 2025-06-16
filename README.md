@@ -17,6 +17,16 @@ This is a **template application** designed for agencies participating in decent
 
 ## 📋 **Prerequisites**
 
+### **System Requirements**
+- **Docker & Docker Compose** installed on your server
+  ```bash
+  # Ubuntu/Debian installation
+  sudo apt update
+  sudo apt install docker.io docker-compose
+  sudo systemctl enable docker
+  sudo usermod -aG docker $USER  # Log out and back in after this
+  ```
+
 ### **Domain & DNS (Required for Production)**
 - **Domain name** from any provider (GoDaddy, Namecheap, Cloudflare, etc.)
 - **DNS A record** pointing your domain to your server's IP address
