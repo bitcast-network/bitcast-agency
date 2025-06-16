@@ -1,4 +1,4 @@
-# YouTube OAuth Manager Template
+# Bitcast Agency Web Page Template
 
 **An open-source template for content creator agencies to collect YouTube OAuth tokens for Bitcast Network mining (Subnet 93 on Bittensor).**
 
