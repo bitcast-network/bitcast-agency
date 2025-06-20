@@ -2,7 +2,7 @@
 
 **An open-source template for content creator agencies to collect YouTube OAuth tokens for Bitcast Network mining (Subnet 93 on Bittensor).**
 
-This is a **template application** designed for agencies participating in decentralized mining on the Bitcast Network. The template provides a clean, branded interface for content creators to authorize access to their YouTube accounts.
+This is a **template application** designed for agencies participating in decentralized mining on the [Bitcast Network](https://github.com/bitcast-network/bitcast). The template provides a clean, branded interface for content creators to authorize access to their YouTube accounts. Agencies will earn rewards on behalf of the creators.
 
 ![YouTube OAuth Manager Interface](sample.png)
 
