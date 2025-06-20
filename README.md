@@ -49,10 +49,15 @@ This is a **template application** designed for agencies participating in decent
 
 ### **1. Clone and Configure**
 ```bash
-# Copy environment template and set your domain
+# Copy environment template and set variables
 cp env.example .env
-echo "DOMAIN=yourdomain.com" > .env  # Replace with your actual domain
-```
+
+# Update required variables in .env:
+# - DOMAIN: Your actual domain name (required for OAuth)
+# - APP_TITLE: Your application title
+# - THEME_COLOR: Your brand color (hex format)
+# - COMPANY_NAME: Your company name (required for privacy policy)
+# - PRIVACY_CONTACT_EMAIL: Contact email (required for privacy policy)
 
 ### **2. Google OAuth Configuration**
 
@@ -122,6 +127,7 @@ echo "THEME_COLOR=#your-brand-color" >> .env
 - `GET /api/oauth/check-setup` - Check OAuth configuration  
 - `POST /api/oauth/start` - Start OAuth flow for a user
 - `GET /api/oauth/callback` - OAuth callback endpoint (used by Google)
+- `GET /privacy` - Privacy policy page (dynamically generated)
 
 ## 🛠️ **Development**
 

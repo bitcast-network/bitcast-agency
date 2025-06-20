@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from pathlib import Path
 from pydantic import BaseModel
 from typing import Optional
@@ -229,6 +229,33 @@ def oauth_callback(code: str = Query(...), state: Optional[str] = Query(None)):
             status_code=302
         )
 
+@app.get("/privacy")
+def privacy_policy():
+    """Serve privacy policy with environment variable substitution."""
+    try:
+        # Read the privacy policy template
+        privacy_path = Path(__file__).parent.parent / "frontend" / "privacy.html"
+        if not privacy_path.exists():
+            raise HTTPException(status_code=404, detail="Privacy policy template not found")
+        
+        with open(privacy_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Replace template variables with environment values
+        replacements = {
+            '{{APP_TITLE}}': os.getenv('APP_TITLE', 'YouTube OAuth Manager'),
+            '{{COMPANY_NAME}}': os.getenv('COMPANY_NAME', 'Your Company Name'),
+            '{{PRIVACY_CONTACT_EMAIL}}': os.getenv('PRIVACY_CONTACT_EMAIL', 'privacy@example.com'),
+        }
+        
+        # Apply all replacements
+        for placeholder, value in replacements.items():
+            content = content.replace(placeholder, value)
+        
+        return HTMLResponse(content=content)
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to serve privacy policy: {str(e)}")
 
 # Mount static files AFTER API routes to prevent conflicts
 app.mount("/", StaticFiles(directory=Path(__file__).parent.parent / "frontend", html=True), name="static") 
