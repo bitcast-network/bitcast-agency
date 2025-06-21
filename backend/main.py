@@ -62,14 +62,7 @@ def status():
         "redirect_uri": get_redirect_uri()
     }
 
-@app.get("/api/config")
-def get_config():
-    """Get application configuration for frontend."""
-    return {
-        "app_title": os.getenv('APP_TITLE', '🎥 YouTube OAuth Manager'),
-        "logo_path": os.getenv('LOGO_PATH', '/logo.svg'),
-        "theme_color": os.getenv('THEME_COLOR', '#667eea')
-    }
+
 
 @app.get("/api/oauth/check-setup")
 def check_oauth_setup():
@@ -257,5 +250,57 @@ def privacy_policy():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to serve privacy policy: {str(e)}")
 
-# Mount static files AFTER API routes to prevent conflicts
-app.mount("/", StaticFiles(directory=Path(__file__).parent.parent / "frontend", html=True), name="static") 
+@app.get("/")
+def serve_index():
+    """Serve index page with environment variable substitution."""
+    try:
+        # Read the index HTML template
+        index_path = Path(__file__).parent.parent / "frontend" / "index.html"
+        if not index_path.exists():
+            raise HTTPException(status_code=404, detail="Index template not found")
+        
+        with open(index_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Get configuration values
+        app_title = os.getenv('APP_TITLE', '🎥 YouTube OAuth Manager')
+        logo_path = os.getenv('LOGO_PATH', '/logo.svg')
+        theme_color = os.getenv('THEME_COLOR', '#667eea')
+        
+        # Generate lighter color for gradient
+        def hex_to_rgb(hex_color):
+            hex_color = hex_color.lstrip('#')
+            return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        
+        def generate_lighter_color(hex_color, factor=0.3):
+            try:
+                r, g, b = hex_to_rgb(hex_color)
+                # Blend with white to make lighter
+                r = int(r + (255 - r) * factor)
+                g = int(g + (255 - g) * factor)
+                b = int(b + (255 - b) * factor)
+                return f"#{r:02x}{g:02x}{b:02x}"
+            except:
+                return "#764ba2"  # fallback
+        
+        theme_color_light = generate_lighter_color(theme_color, 0.4)
+        
+        # Replace template variables with environment values
+        replacements = {
+            '{{APP_TITLE}}': app_title,
+            '{{LOGO_PATH}}': logo_path,
+            '{{THEME_COLOR}}': theme_color,
+            '{{THEME_COLOR_LIGHT}}': theme_color_light,
+        }
+        
+        # Apply all replacements
+        for placeholder, value in replacements.items():
+            content = content.replace(placeholder, value)
+        
+        return HTMLResponse(content=content)
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to serve index page: {str(e)}")
+
+# Mount other static files (excluding index.html which we serve dynamically)
+app.mount("/", StaticFiles(directory=Path(__file__).parent.parent / "frontend"), name="static") 

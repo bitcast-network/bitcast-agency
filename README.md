@@ -84,7 +84,10 @@ chmod +x start.sh
 ./start.sh
 ```
 
-### **4. Access Your Application**
+### **4. Review Privacy Policy**
+- **Important:** Review and customize the privacy policy template at `frontend/privacy.html` to match your specific usage and data practices
+
+### **5. Access Your Application**
 - **Production:** `https://yourdomain.com`
 - **Development:** `http://localhost`
 

@@ -13,6 +13,8 @@ services:
       - APP_TITLE=${APP_TITLE:-🎥 YouTube OAuth Manager}
       - LOGO_PATH=${LOGO_PATH:-/icon_gradient.svg}
       - THEME_COLOR=${THEME_COLOR:-#667eea}
+      - COMPANY_NAME=${COMPANY_NAME:-Your Company Name}
+      - PRIVACY_CONTACT_EMAIL=${PRIVACY_CONTACT_EMAIL:-privacy@example.com}
     restart: always
 
   caddy:
