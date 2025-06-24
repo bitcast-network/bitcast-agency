@@ -194,6 +194,45 @@
         .footer a:hover {
             text-decoration: underline;
         }
+
+        .form-helper {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        .form-helper.valid {
+            color: #00875f;
+        }
+
+        .form-helper.invalid {
+            color: #de350b;
+        }
+
+        .form-helper.neutral {
+            color: #666;
+        }
+
+        .btn:disabled {
+            background: #f4f5f7;
+            color: #a5adba;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .form-group input.invalid {
+            border-color: #de350b;
+        }
+
+        .form-group input.valid {
+            border-color: #00875f;
+        }
     </style>
 </head>
 <body>
@@ -213,9 +252,11 @@
             <h2>Grant YouTube Read Access</h2>
             <div class="form-group">
                 <label for="userId">User Identifier:</label>
-                <input type="text" id="userId" placeholder="Enter a unique identifier (e.g., user123, channel_name)" />
+                <input type="text" id="userId" placeholder="Enter 3-50 letters/numbers only (e.g., user123, channelname)" 
+                       oninput="validateUserId()" onblur="validateUserId()" />
+                <small id="userIdHelper" class="form-helper"></small>
             </div>
-            <button class="btn" onclick="startOAuth()">Connect YouTube Account</button>
+            <button class="btn" id="connectBtn" onclick="startOAuth()" disabled>Connect YouTube Account</button>
             
             <div id="authInProgress" class="auth-url-section hidden">
                 <p><strong>🔄 OAuth in progress...</strong></p>
@@ -235,6 +276,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkSetup();
             handleOAuthReturn();
+            validateUserId(); // Initial validation
         });
 
         // Configuration is now loaded server-side, so we can handle logo errors
@@ -289,8 +331,10 @@
 
         async function startOAuth() {
             const userId = document.getElementById('userId').value.trim();
-            if (!userId) {
-                showMessage('Please enter a user identifier.', 'error');
+            
+            // Validate on submit as well
+            if (!validateUserId()) {
+                showMessage('Please enter a valid user identifier.', 'error');
                 return;
             }
 
@@ -321,6 +365,54 @@
                 console.error('Error starting OAuth:', error);
                 showMessage('Error starting OAuth flow.', 'error');
             }
+        }
+
+        function validateUserId() {
+            const userIdInput = document.getElementById('userId');
+            const helperText = document.getElementById('userIdHelper');
+            const connectBtn = document.getElementById('connectBtn');
+            const userId = userIdInput.value.trim();
+
+            if (userId === '') {
+                helperText.textContent = 'Enter a unique identifier to continue';
+                helperText.className = 'form-helper neutral';
+                userIdInput.className = userIdInput.className.replace(/\s*(valid|invalid)/g, '');
+                connectBtn.disabled = true;
+                return false;
+            }
+
+            // Check length
+            if (userId.length < 3) {
+                helperText.textContent = 'Must be at least 3 characters long';
+                helperText.className = 'form-helper invalid';
+                userIdInput.className = userIdInput.className.replace(/\s*(valid|invalid)/g, '') + ' invalid';
+                connectBtn.disabled = true;
+                return false;
+            }
+
+            if (userId.length > 50) {
+                helperText.textContent = 'Must be 50 characters or less';
+                helperText.className = 'form-helper invalid';
+                userIdInput.className = userIdInput.className.replace(/\s*(valid|invalid)/g, '') + ' invalid';
+                connectBtn.disabled = true;
+                return false;
+            }
+
+            // Check if only alphanumeric characters
+            if (!/^[a-zA-Z0-9]+$/.test(userId)) {
+                helperText.textContent = 'Only letters and numbers allowed (no spaces or special characters)';
+                helperText.className = 'form-helper invalid';
+                userIdInput.className = userIdInput.className.replace(/\s*(valid|invalid)/g, '') + ' invalid';
+                connectBtn.disabled = true;
+                return false;
+            }
+
+            // Valid
+            helperText.textContent = '✓ Valid identifier';
+            helperText.className = 'form-helper valid';
+            userIdInput.className = userIdInput.className.replace(/\s*(valid|invalid)/g, '') + ' valid';
+            connectBtn.disabled = false;
+            return true;
         }
 
         function showMessage(text, type) {

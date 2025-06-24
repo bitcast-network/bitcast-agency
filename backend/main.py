@@ -2,18 +2,39 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, HTMLResponse
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 from typing import Optional
 import json
 import os
 import pickle
 import datetime
+import re
 from urllib.parse import urlencode
 from google.oauth2.credentials import Credentials
 import google.auth.transport.requests
 import requests
 
 app = FastAPI(title="YouTube OAuth Manager", description="Manage YouTube OAuth tokens with user identifiers")
+
+def validate_user_id(user_id: str) -> bool:
+    """
+    Validate user identifier format.
+    - Only alphanumeric characters (A-Z, a-z, 0-9)
+    - Length between 3 and 50 characters
+    - No spaces, special characters, or unicode
+    """
+    if not user_id:
+        return False
+    
+    # Check length
+    if len(user_id) < 3 or len(user_id) > 50:
+        return False
+    
+    # Check if only alphanumeric characters (ASCII only)
+    if not re.match(r'^[a-zA-Z0-9]+$', user_id):
+        return False
+    
+    return True
 
 def get_domain():
     """Get domain from environment variable, fallback to localhost."""
@@ -28,7 +49,13 @@ def get_redirect_uri():
         return f"https://{domain}/api/oauth/callback"
 
 class AuthRequest(BaseModel):
-    user_id: str
+    user_id: str = Field(..., min_length=3, max_length=50, description="User identifier (3-50 alphanumeric characters only)")
+    
+    @validator('user_id')
+    def validate_user_id_format(cls, v):
+        if not validate_user_id(v.strip()):
+            raise ValueError('User ID must be 3-50 characters long and contain only letters and numbers (no spaces or special characters)')
+        return v.strip()
 
 # YouTube API scopes
 SCOPES = [
@@ -62,6 +89,34 @@ def status():
         "redirect_uri": get_redirect_uri()
     }
 
+@app.get("/api/validate-user-id/{user_id}")
+def validate_user_id_endpoint(user_id: str):
+    """Validate a user identifier format."""
+    try:
+        # Decode any URL encoding first
+        from urllib.parse import unquote
+        decoded_user_id = unquote(user_id)
+        
+        is_valid = validate_user_id(decoded_user_id)
+        if is_valid:
+            return {
+                "valid": True,
+                "message": "User ID format is valid",
+                "user_id": decoded_user_id
+            }
+        else:
+            return {
+                "valid": False,
+                "message": "User ID must be 3-50 characters long and contain only letters and numbers (no spaces or special characters)",
+                "user_id": decoded_user_id
+            }
+    except Exception as e:
+        return {
+            "valid": False,
+            "message": f"Error validating user ID: {str(e)}",
+            "user_id": user_id
+        }
+
 
 
 @app.get("/api/oauth/check-setup")
@@ -82,6 +137,13 @@ def start_oauth_flow(request: AuthRequest):
             raise HTTPException(status_code=400, detail="User ID is required")
         
         user_id = request.user_id.strip()
+        
+        # Validate user_id format - only alphanumeric characters
+        if not validate_user_id(user_id):
+            raise HTTPException(
+                status_code=400, 
+                detail="User ID must be 3-50 characters long and contain only letters and numbers (no spaces or special characters)"
+            )
         
         # Load client secrets
         client_secrets = get_client_secrets()
@@ -195,21 +257,36 @@ def oauth_callback(code: str = Query(...), state: Optional[str] = Query(None)):
         print(f"🔄 OAuth callback received for user_id: {user_id}")
         print(f"🔄 Authorization code: {code[:20]}...")
         
+        # Validate user_id from state parameter for security
+        if user_id != "unknown" and not validate_user_id(user_id):
+            print(f"❌ Invalid user_id format in OAuth callback: {user_id}")
+            from urllib.parse import quote
+            encoded_message = quote("Invalid user identifier format")
+            return RedirectResponse(
+                url=f"/?error=true&message={encoded_message}",
+                status_code=302
+            )
+        
         # Exchange authorization code for tokens
         success = exchange_code_for_tokens(user_id, code)
         print(f"🔄 Token exchange result: {success}")
         
         if success:
             print(f"✅ OAuth completed successfully for {user_id}")
-            # Redirect back to the main page with success message
+            # Redirect back to the main page with success message (URL encode parameters)
+            from urllib.parse import quote
+            encoded_user_id = quote(user_id)
+            encoded_message = quote(f"OAuth authorization completed successfully for {user_id}")
             return RedirectResponse(
-                url=f"/?success=true&user_id={user_id}&message=OAuth authorization completed successfully for {user_id}",
+                url=f"/?success=true&user_id={encoded_user_id}&message={encoded_message}",
                 status_code=302
             )
         else:
             print(f"❌ Token exchange failed for {user_id}")
+            from urllib.parse import quote
+            encoded_message = quote("Failed to exchange authorization code for tokens")
             return RedirectResponse(
-                url=f"/?error=true&message=Failed to exchange authorization code for tokens",
+                url=f"/?error=true&message={encoded_message}",
                 status_code=302
             )
     except Exception as e:
@@ -217,8 +294,10 @@ def oauth_callback(code: str = Query(...), state: Optional[str] = Query(None)):
         import traceback
         traceback.print_exc()
         # Redirect back with error message
+        from urllib.parse import quote
+        encoded_message = quote(f"OAuth authorization failed: {str(e)}")
         return RedirectResponse(
-            url=f"/?error=true&message=OAuth authorization failed: {str(e)}",
+            url=f"/?error=true&message={encoded_message}",
             status_code=302
         )
 
