@@ -254,7 +254,7 @@
             const userId = urlParams.get('user_id');
 
             if (success === 'true') {
-                showMessage(message || `OAuth completed successfully for ${userId}`, 'success');
+                showMessage(`✅ Authorization successful! Please reach out to admin for next steps.`, 'success');
                 // Clear URL parameters
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else if (error === 'true') {
@@ -334,7 +334,7 @@
             
             setTimeout(() => {
                 messageDiv.remove();
-            }, 5000);
+            }, 60000);
         }
     </script>
 </body>
