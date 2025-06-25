@@ -251,8 +251,8 @@
         <div class="auth-section">
             <h2>Grant YouTube Read Access</h2>
             <div class="form-group">
-                <label for="userId">User Identifier:</label>
-                <input type="text" id="userId" placeholder="Enter 3-50 letters/numbers only (e.g., user123, channelname)" 
+                <label for="userId">Channel Name:</label>
+                <input type="text" id="userId" placeholder="Enter your YouTube channel name (e.g., My_Channel, TechReviews)" 
                        oninput="validateUserId()" onblur="validateUserId()" />
                 <small id="userIdHelper" class="form-helper"></small>
             </div>
@@ -392,7 +392,7 @@
             const userId = userIdInput.value.trim();
 
             if (userId === '') {
-                helperText.textContent = 'Enter a unique identifier to continue';
+                helperText.textContent = 'Enter any unique identifier to continue';
                 helperText.className = 'form-helper neutral';
                 userIdInput.className = userIdInput.className.replace(/\s*(valid|invalid)/g, '');
                 connectBtn.disabled = true;
